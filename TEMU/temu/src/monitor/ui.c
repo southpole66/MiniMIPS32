@@ -1,9 +1,11 @@
 #include "monitor.h"
 #include "temu.h"
+#include "watchpoint.h"
 
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include<expr.h>
 
 void cpu_exec(uint32_t);
 
@@ -38,15 +40,169 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
-static struct {
-	char *name;
-	char *description;
-	int (*handler) (char *);
+//单步调试
+static int cmd_si(char* args)
+{	
+	
+
+	char *arg = strtok(NULL, " ");
+	int i=1 ;
+
+	if (arg != NULL)
+	{
+		int step = atoi(arg);
+		if(step<1)
+		{
+			fprintf(stderr, "执行步数应该至少为1\n");
+					return -1;
+		}
+		else{
+		sscanf(arg, "%d", &i);
+		}
+	}
+	cpu_exec(i);
+	return 0;
+}
+
+//打印程序状态
+static int cmd_info(char*args)
+{
+	char* arg = strtok(args, " ");
+	if(args==NULL)
+		{
+			printf("请输入想要查询的对象\n");
+			return 0;
+		}
+	else if(strcmp(arg,"r")==0)
+		{
+			for (int i = R_ZERO; i <= R_RA;i++)
+			{
+				printf("%s\t 0x%08x\n", regfile[i], reg_w(i));
+
+			}
+		}
+	else if(strcmp(arg, "w") == 0)
+		{
+			list_watchpoint();
+		}
+	else 
+		{
+			fprintf(stderr, "未知的查看命令\n");
+			return -1;
+		}
+	return 0;
+}
+//表达式求职
+static int cmd_p(char* args){
+    uint32_t num;
+    bool success;
+    num = expr(args, &success);
+    if (success)
+    {
+        printf("Expression %s:\t0x%x\t%d\n", args, num, num);
+    }
+//    else assert(0);
+    return 0;
+}
+
+
+
+
+//扫描内存
+static int cmd_x(char* args){
+    if (args == NULL)//x后面的参数
+    {
+        printf("Need more parameters type 1.\n");
+        return 0;
+    }
+
+    char *arg = strtok(args, " ");
+    /*
+	if (arg == NULL)
+    {
+        printf("Need more parameters type 2.\n");
+        return 0;
+    }
+	*/
+
+    int n = atoi(arg);
+    char *EXPR = strtok(NULL, " ");
+    if (EXPR == NULL)
+    {
+        printf("Need more parameters type 2.\n");
+        return 0;
+    }
+
+    uint32_t address;
+    bool success;
+    address = expr(EXPR, &success);
+    if (success)
+    {
+        for (int i=0;i<n;i++){
+            uint32_t data= mem_read(address+i*4,4);
+            printf("0x%08x: ",address + i*4);
+            for(int j=0;j<4;j++){
+                printf("0x%02x ",data&0xff);
+                data = data >> 8;
+            }
+            printf("\n");
+        }
+    }
+    else {
+        assert(0);
+    }
+    return 0;
+}
+
+//设置监视点
+static int cmd_w(char*args)
+{
+if (args)
+	{
+		int NO = set_watchpoint(args);
+		if (NO != -1)
+		{
+			printf("Set watchpoint #%d\n", NO);
+		}
+		else
+		{
+			printf("Bad expression\n");
+		}
+	}
+	return 0;
+
+}
+//删除监视点
+static int cmd_d(char *args)
+{
+	int NO;
+	sscanf(args, "%d", &NO);
+	if (!delete_watchpoint(NO))
+	{
+		printf("Watchpoint #%d does not exist\n", NO);
+	}
+
+	return 0;
+}
+
+
+
+		static struct
+		{
+			char *name;
+			char *description;
+			int (*handler)(char *);
 } cmd_table [] = {
 	{ "help", "Display informations about all supported commands", cmd_help },
 	{ "c", "Continue the execution of the program", cmd_c },
-	{ "q", "Exit TEMU", cmd_q }
-
+	{ "q", "Exit TEMU", cmd_q },
+	{"si","单步调试",cmd_si},
+	{"info","-r : 打印寄存器状态  -w :打印监视点状态",cmd_info},
+	{"x","扫描内存, -n -expr 扫描内存",cmd_x},
+	{"p","表达式求值",cmd_p},
+	{"w","监视点", cmd_w},
+	{"d","监视点", cmd_d},
+ 
 	/* TODO: Add more commands */
 
 };
