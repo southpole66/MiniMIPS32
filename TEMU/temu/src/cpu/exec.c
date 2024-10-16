@@ -1,5 +1,6 @@
 #include "helper.h"
 #include "all-instr.h"
+#include "monitor.h"
 
 typedef void (*op_fun)(uint32_t);
 static make_helper(_2byte_esc);
@@ -30,8 +31,8 @@ op_fun opcode_table [64] = {
 };
 
 op_fun _2byte_opcode_table [64] = {
-/* 0x00 */	inv, inv, inv, inv, 
-/* 0x04 */	inv, inv, inv, inv, 
+/* 0x00 */	sll, inv, srl, sra, 
+/* 0x04 */	sllv, inv, srlv, srav, 
 /* 0x08 */	inv, inv, inv, inv, 
 /* 0x0c */	inv, inv, inv, inv, 
 /* 0x10 */	inv, inv, inv, inv, 
@@ -63,11 +64,14 @@ make_helper(exec) {
 		// trap_handler(pc);   //处理异常
 		return;
 	}
+
+
 	instr = instr_fetch(pc, 4);
 	ops_decoded.opcode = instr >> 26;
 	opcode_table[ ops_decoded.opcode ](pc);
 
 	/*----------Gloden_trace----------*/
+	if(temu_state != END){
 	int Rd_num = op_dest->reg;
 	//根据测试更新
 	if(Rd_num==-1)
@@ -82,7 +86,7 @@ make_helper(exec) {
 	// Trace(cpu.pc, Rd_num,regfile[Rd_num], cpu.gpr[Rd_num]._32);
 	// Trace(cpu.pc, Rd_num,regfile[Rd_num], cpu.gpr[Rd_num]._32);
 	/*-------------------------------*/
-	
+	}
 }
 
 static make_helper(_2byte_esc) {
