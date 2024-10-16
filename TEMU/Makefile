@@ -36,6 +36,7 @@ export	BUILD_DIR
 # ********************
 
 $(BUILD_DIR)$(TEMU_TARGET): 
+	$(MAKE) -C mips_sc
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ $(SRCS) $(LDFLAGS)
 
@@ -50,4 +51,4 @@ clean:
 	rm -f -r ./mips_sc/build
 	rm -f log.txt
 	rm -f *.bin
-
+	rm -f ./golden_trace.txt

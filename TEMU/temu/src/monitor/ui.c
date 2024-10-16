@@ -53,7 +53,7 @@ static int cmd_si(char* args)
 		int step = atoi(arg);
 		if(step<1)
 		{
-			fprintf(stderr, "执行步数应该至少为1\n");
+			fprintf(stderr, "usage: n must be greater than 1\n");
 					return -1;
 		}
 		else{
@@ -70,7 +70,7 @@ static int cmd_info(char*args)
 	char* arg = strtok(args, " ");
 	if(args==NULL)
 		{
-			printf("请输入想要查询的对象\n");
+			printf("usage: info r or info w\n");
 			return 0;
 		}
 	else if(strcmp(arg,"r")==0)
@@ -87,7 +87,7 @@ static int cmd_info(char*args)
 		}
 	else 
 		{
-			fprintf(stderr, "未知的查看命令\n");
+			fprintf(stderr, "unknown command\n");
 			return -1;
 		}
 	return 0;
@@ -112,24 +112,17 @@ static int cmd_p(char* args){
 static int cmd_x(char* args){
     if (args == NULL)//x后面的参数
     {
-        printf("Need more parameters type 1.\n");
+        printf("usage: x n addr(0x)\n");
         return 0;
     }
 
     char *arg = strtok(args, " ");
-    /*
-	if (arg == NULL)
-    {
-        printf("Need more parameters type 2.\n");
-        return 0;
-    }
-	*/
 
     int n = atoi(arg);
     char *EXPR = strtok(NULL, " ");
     if (EXPR == NULL)
     {
-        printf("Need more parameters type 2.\n");
+        printf("usage: x n addr(0x)\n");
         return 0;
     }
 
@@ -196,12 +189,12 @@ static int cmd_d(char *args)
 	{ "help", "Display informations about all supported commands", cmd_help },
 	{ "c", "Continue the execution of the program", cmd_c },
 	{ "q", "Exit TEMU", cmd_q },
-	{"si","单步调试",cmd_si},
-	{"info","-r : 打印寄存器状态  -w :打印监视点状态",cmd_info},
-	{"x","扫描内存, -n -expr 扫描内存",cmd_x},
-	{"p","表达式求值",cmd_p},
-	{"w","监视点", cmd_w},
-	{"d","监视点", cmd_d},
+	{"si","Single instruction execute",cmd_si},
+	{"info","Printf state of registers(r) or watchpoint(w)",cmd_info},
+	{"x","Scan memory",cmd_x},
+	{"p","Evaluate expression", cmd_p},
+	{"w","Create WatchPoint", cmd_w},
+	{"d","Delete WatchPoint", cmd_d},
  
 	/* TODO: Add more commands */
 
