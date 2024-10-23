@@ -1,5 +1,7 @@
 #include "monitor.h"
 #include "helper.h"
+#include "watchpoint.h"
+#include "expr.h"
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -18,7 +20,7 @@ char asm_buf[128];
 void print_bin_instr(uint32_t pc) {
 	int i;
 	if(temu_state != END) {
-		int l = sprintf(asm_buf, "%8x:   ", pc);
+		int l = sprintf(asm_buf, "%8x:   ", cpu.pc);
 		for(i = 3; i >= 0; i --) {
 			l += sprintf(asm_buf + l, "%02x ", instr_fetch(pc + i, 1));
 		}
@@ -69,7 +71,17 @@ void cpu_exec(volatile uint32_t n) {
 
 		/* TODO: check watchpoints here. */
 
-
+		WP *wp = scan_watchpoint();
+		if(wp != NULL) {
+			// puts(asm_buf);
+			bool success;
+			uint32_t address;
+			address = expr(wp->expr, &success);
+			printf("\n\nHint watchpoint %d at address 0x%08x, expr = %s\n", wp->NO, address, wp->expr);
+			printf("old value = %#08x\nnew value = %#08x\n", wp->old_val, wp->new_val);
+			wp->old_val = wp->new_val;
+			return;
+		}
 		if(temu_state != RUNNING) { return; }
 	}
 
