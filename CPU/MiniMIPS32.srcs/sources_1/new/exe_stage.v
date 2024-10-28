@@ -9,8 +9,10 @@ module exe_stage (
     input  wire [`REG_BUS 		] 	exe_src2_i,
     input  wire [`REG_ADDR_BUS 	] 	exe_wa_i,
     input  wire 					exe_wreg_i,
+    input  wire                     exe_mreg_i,
+    input  wire [`REG_BUS       ]   exe_din_i,
+    input  wire                     exe_whilo_i,
     input  wire [`INST_ADDR_BUS]    exe_debug_wb_pc,  // 供调试使用的PC值，上板测试时务必删除该信号
-
     // 送至执行阶段的信息
     output wire [`ALUOP_BUS	    ] 	exe_aluop_o,
     output wire [`REG_ADDR_BUS 	] 	exe_wa_o,

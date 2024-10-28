@@ -11,6 +11,9 @@ module idexe_reg (
     input  wire [`REG_BUS      ]  id_src2,
     input  wire [`REG_ADDR_BUS ]  id_wa,
     input  wire                   id_wreg,
+    input  wire [`REG_BUS      ]  id_din,
+    input  wire                   id_whilo,
+    input  wire                   id_mreg,
     input  wire [`INST_ADDR_BUS]  id_debug_wb_pc, // 供调试使用的PC值，上板测试时务必删除该信号
     
     // 送至执行阶段的信息
@@ -20,6 +23,9 @@ module idexe_reg (
     output reg  [`REG_BUS      ]  exe_src2,
     output reg  [`REG_ADDR_BUS ]  exe_wa,
     output reg                    exe_wreg,
+    output reg  [`REG_BUS      ]  exe_din,
+    output reg                    exe_whilo,
+    output reg                    exe_mreg,
     output reg  [`INST_ADDR_BUS]  exe_debug_wb_pc  // 供调试使用的PC值，上板测试时务必删除该信号
     );
 
@@ -42,6 +48,9 @@ module idexe_reg (
             exe_src2 		   <= id_src2;
             exe_wa 			   <= id_wa;
             exe_wreg		   <= id_wreg;
+            exe_din 		   <= id_din;
+            exe_whilo 		   <= id_whilo;
+            exe_mreg 		   <= id_mreg;
             exe_debug_wb_pc    <= id_debug_wb_pc;   // 上板测试时务必删除该语句
         end
     end
