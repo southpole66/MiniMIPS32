@@ -62,13 +62,12 @@ make_helper(addi){
 	int res = (int)op_src1->val + imm;
 	// if overflow
 	if (((int)op_src1->val > 0 && imm > 0 && res < 0) || ((int)op_src1->val < 0 && imm < 0 && res > 0)){
-		// TODO: exception
-		// if (cpu.cp0.status.EXL == 0){
-		// 	cpu.cp0.cause.ExcCode = Ov;
-		// 	cpu.cp0.EPC = cpu.pc;
-		// 	cpu.pc = TRAP_ADDR;
-		// 	cpu.cp0.status.EXL = 1;
-		// }
+        if (cpu.cp0.status.EXL == 0) {
+            cpu.cp0.cause.ExcCode = Ov;
+            cpu.cp0.EPC = cpu.pc;
+            cpu.pc = TRAP_ADDR;
+            cpu.cp0.status.EXL = 1;
+        }
 	}
 	else{
 		reg_w(op_dest->reg) = res;
@@ -308,7 +307,13 @@ make_helper(lh) {
     }
     uint32_t addr = imm + (uint32_t)op_src1->val;
     if (addr & 0x1) {
-        // TODO exception-地址错异常
+        if (cpu.cp0.status.EXL == 0) {
+            cpu.cp0.EPC = cpu.pc;
+            cpu.cp0.BadVAddr = addr;  // 虚拟地址
+            cpu.pc = TRAP_ADDR;
+            cpu.cp0.cause.ExcCode = AdEL;
+            cpu.cp0.status.EXL = 1;
+        }
     } else {
         uint32_t val = mem_read(addr, 2);
         if (val & 0x8000) {
@@ -330,7 +335,13 @@ make_helper(lhu) {
     }
     uint32_t addr = imm + (uint32_t)op_src1->val;
     if (addr & 0x1) {
-        // TODO exception-地址错异常
+        if (cpu.cp0.status.EXL == 0) {
+            cpu.cp0.EPC = cpu.pc;
+            cpu.cp0.BadVAddr = addr;  // 虚拟地址
+            cpu.pc = TRAP_ADDR;
+            cpu.cp0.cause.ExcCode = AdEL;
+            cpu.cp0.status.EXL = 1;
+        }
     } else {
         uint32_t val = mem_read(addr, 2);
         reg_w(op_dest->reg) = val;
@@ -349,7 +360,13 @@ make_helper(lw) {
     }
     uint32_t addr = imm + (uint32_t)op_src1->val;
     if (addr & 0x3) {
-        // TODO exception-地址错异常
+        if (cpu.cp0.status.EXL == 0) {
+            cpu.cp0.EPC = cpu.pc;
+            cpu.cp0.BadVAddr = addr;  // 虚拟地址
+            cpu.pc = TRAP_ADDR;
+            cpu.cp0.cause.ExcCode = AdEL;
+            cpu.cp0.status.EXL = 1;
+        }
     } else {
         uint32_t val = mem_read(addr, 4);
         reg_w(op_dest->reg) = val;
@@ -382,7 +399,13 @@ make_helper(sh) {
     }
     uint32_t addr = imm + (uint32_t)op_src1->val;
     if (addr & 0x1) {
-        // TODO exception-地址错异常
+        if (cpu.cp0.status.EXL == 0) {
+            cpu.cp0.EPC = cpu.pc;
+            cpu.cp0.BadVAddr = addr;  // 虚拟地址
+            cpu.pc = TRAP_ADDR;
+            cpu.cp0.cause.ExcCode = AdES;
+            cpu.cp0.status.EXL = 1;
+        }
     } else {
         mem_write(addr, 2, reg_w(op_dest->reg));
     }
@@ -400,7 +423,13 @@ make_helper(sw) {
     }
     uint32_t addr = imm + (uint32_t)op_src1->val;
     if (addr & 0x3) {
-        // TODO exception-地址错异常
+        if (cpu.cp0.status.EXL == 0) {
+            cpu.cp0.EPC = cpu.pc;     // 物理地址
+            cpu.cp0.BadVAddr = addr;  // 虚拟地址
+            cpu.pc = TRAP_ADDR;
+            cpu.cp0.cause.ExcCode = AdES;
+            cpu.cp0.status.EXL = 1;
+        }
     } else {
         mem_write(addr, 4, reg_w(op_dest->reg));
     }

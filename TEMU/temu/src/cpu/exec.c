@@ -5,6 +5,8 @@
 typedef void (*op_fun)(uint32_t);
 static make_helper(_2byte_esc);
 static make_helper(b_sel);
+static make_helper(privilege_instr);
+static make_helper(trap_handler);
 
 Operands ops_decoded;
 uint32_t instr;
@@ -17,7 +19,7 @@ op_fun opcode_table [64] = {
 /* 0x04 */	beq, bne, blez, bgtz,
 /* 0x08 */	addi, addiu, slti, sltiu,
 /* 0x0c */	andi,ori, xori, lui,
-/* 0x10 */	inv, inv, temu_trap, inv,
+/* 0x10 */  privilege_instr, inv, temu_trap, inv,
 /* 0x14 */	inv, inv, inv, inv,
 /* 0x18 */	inv, inv, inv, inv,
 /* 0x1c */	inv, inv, inv, inv,
@@ -35,7 +37,7 @@ op_fun _2byte_opcode_table [64] = {
 /* 0x00 */	sll, inv, srl, sra, 
 /* 0x04 */	sllv, inv, srlv, srav, 
 /* 0x08 */	jr, jalr, inv, inv, 
-/* 0x0c */	inv, inv, inv, inv, 
+/* 0x0c */	syscall, break_, inv, inv, 
 /* 0x10 */	mfhi, mthi, mflo, mtlo, 
 /* 0x14 */	inv, inv, inv, inv, 
 /* 0x18 */	mult, multu, div, divu, 
@@ -47,7 +49,7 @@ op_fun _2byte_opcode_table [64] = {
 /* 0x30 */	inv, inv, inv, inv, 
 /* 0x34 */	inv, inv, inv, inv,
 /* 0x38 */	inv, inv, inv, inv, 
-/* 0x3c */	inv, inv, inv, inv
+/* 0x3c */	inv, inv, inv, bad_temu_trap
 };
 
 make_helper(exec) {
@@ -62,7 +64,7 @@ make_helper(exec) {
 		return;
 	}
 	if(pc == 0x1FC00380 && cpu.cp0.cause.ExcCode != 0) {
-		// trap_handler(pc);   //处理异常
+		trap_handler(pc);   //处理异常
 		return;
 	}
 
@@ -83,10 +85,6 @@ make_helper(exec) {
 	Trace("%08x		%08x(%s)		%08x(%s)\n", cpu.pc, cpu.hi, "$HI", cpu.lo, "$LO");
 	else
 	Trace("%08x		%02d(%s)		%08x\n", cpu.pc, Rd_num, REG_NAME(Rd_num), reg_w(Rd_num));
-	// 处理hilo寄存器
-	// Trace(cpu.pc, Rd_num,regfile[Rd_num], cpu.gpr[Rd_num]._32);
-	// Trace(cpu.pc, Rd_num,regfile[Rd_num], cpu.gpr[Rd_num]._32);
-	/*-------------------------------*/
 	}
 }
 
@@ -112,4 +110,45 @@ static make_helper(b_sel) {
 			bgezal(pc);
             break;
 	}
+}
+
+static make_helper(privilege_instr) {
+	uint32_t select = (instr >> 21) & 0x001F;
+	switch(select) {
+		case 0:
+			mfc0(pc);
+            break;
+		case 4:
+			mtc0(pc);
+            break;
+		case 16:
+			eret(pc);
+            break;
+	}
+}
+
+static make_helper(trap_handler) {
+	switch(cpu.cp0.cause.ExcCode) {
+		case AdEL:
+			printf("Instruction read address error.\n");
+			break;
+		case AdES:
+			printf("Instruction write address error.\n");
+			break;
+		case Ov:
+			printf("Int overflow error.\n");
+			break;
+		case Sys:
+			printf("Syscall.\n");
+			break;
+		case Bp:
+			printf("Break.\n");
+			break;
+		case RI:
+			printf("Reversed instruction error.\n");
+			break;
+		default:
+			printf("Unresolved exception.\n");
+	}
+	eret(pc);
 }
