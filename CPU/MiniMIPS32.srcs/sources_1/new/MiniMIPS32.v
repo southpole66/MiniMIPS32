@@ -152,5 +152,12 @@ module MiniMIPS32(
         .debug_wb_rf_wnum(debug_wb_rf_wnum),  
         .debug_wb_rf_wdata(debug_wb_rf_wdata)  
     );
+    
+        hilohilo hilo0(.cpu_clk_50M(cpu_clk_50M), .cpu_rst_n(cpu_rst_n), 
+        .we(wb_whilo_o),
+        .we_hi(wb_whi_o), .we_lo(wb_wlo_o),
+        .hi_i(wb_hilo_o[63:32]), .lo_i(wb_hilo_o[31:0]),
+        .hi_o(exe_hi_i), .lo_o(exe_lo_i)
+    );
 
 endmodule
