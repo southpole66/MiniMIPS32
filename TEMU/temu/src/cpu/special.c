@@ -28,3 +28,27 @@ make_helper(temu_trap) {
 	temu_state = END;
 }
 
+make_helper(break_){
+  cpu.cp0.cause.ExcCode = Bp;
+  cpu.cp0.status.EXL = 1;
+  cpu.cp0.EPC = cpu.pc;
+  cpu.pc = TRAP_ADDR;
+  sprintf(assembly,"break");
+}
+
+make_helper(syscall){
+  cpu.cp0.cause.ExcCode = Sys;
+  cpu.cp0.status.EXL = 1;
+  cpu.cp0.EPC = cpu.pc;
+  cpu.pc = TRAP_ADDR;
+  sprintf(assembly,"syscall");
+}
+
+make_helper(nop) {
+	sprintf(assembly, "NOP");
+}
+
+make_helper(bad_temu_trap){
+    printf("\33[1;31mtemu: HIT BAD TRAP\33[0m at $pc = 0x%08x\n\n", cpu.pc);
+	temu_state = END;
+}

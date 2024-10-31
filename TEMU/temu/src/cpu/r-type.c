@@ -95,13 +95,12 @@ make_helper(add) {
 	decode_r_type(instr);
 	int temp = (int)(op_src1->val) + (int)(op_src2->val);
 	if (((int)op_src1->val > 0 && (int)op_src2->val > 0 && temp < 0) || ((int)op_src1->val < 0 && (int)op_src2->val < 0 && temp > 0)) {
-		// TODO exception
-		// if (cpu.cp0.status.EXL == 0) { // 如果此时异常级为0，即还未有异常发生（不支持嵌套异常）
-		// 	cpu.cp0.cause.ExcCode = Ov; // 记录发生了溢出异常
-		// 	cpu.cp0.EPC = cpu.pc; // 存放异常返回地址（由软件实现具体的返回地址）
-		// 	cpu.pc = TRAP_ADDR; // 跳转到异常处理程序地址。ATTENTION!
-		// 	cpu.cp0.status.EXL = 1; // 记录已有异常发生
-		// }
+		if (cpu.cp0.status.EXL == 0) { // 如果此时异常级为0，即还未有异常发生（不支持嵌套异常）
+			cpu.cp0.cause.ExcCode = Ov; // 记录发生了溢出异常
+			cpu.cp0.EPC = cpu.pc; // 存放异常返回地址（由软件实现具体的返回地址）
+			cpu.pc = TRAP_ADDR; // 跳转到异常处理程序地址。ATTENTION!
+			cpu.cp0.status.EXL = 1; // 记录已有异常发生
+		}
 	}else {
 		reg_w(op_dest->reg) = temp;
 	}
@@ -120,13 +119,12 @@ make_helper(sub) {
 	decode_r_type(instr);
 	int temp = (int)(op_src1->val) - (int)(op_src2->val);
 	if(((int)op_src1->val > 0 && (int)op_src2->val < 0 && temp < 0) || ((int)op_src1->val < 0 && (int)op_src2->val > 0 && temp > 0)) {
-		// TODO exception
-		// if (cpu.cp0.status.EXL == 0) { // 如果此时异常级为0，即还未有异常发生（不支持嵌套异常）
-		// 	cpu.cp0.cause.ExcCode = Ov; // 记录发生了溢出异常
-		// 	cpu.cp0.EPC = cpu.pc; // 存放异常返回地址（由软件实现具体的返回地址）
-		// 	cpu.pc = TRAP_ADDR; // 跳转到异常处理程序地址
-		// 	cpu.cp0.status.EXL = 1; // 记录已有异常发生
-		// }
+		if (cpu.cp0.status.EXL == 0) { // 如果此时异常级为0，即还未有异常发生（不支持嵌套异常）
+			cpu.cp0.cause.ExcCode = Ov; // 记录发生了溢出异常
+			cpu.cp0.EPC = cpu.pc; // 存放异常返回地址（由软件实现具体的返回地址）
+			cpu.pc = TRAP_ADDR; // 跳转到异常处理程序地址
+			cpu.cp0.status.EXL = 1; // 记录已有异常发生
+		}
 	}else {
 		reg_w(op_dest->reg) = temp; // 直接用tmp可以吗
 	}
