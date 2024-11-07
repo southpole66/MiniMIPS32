@@ -20,7 +20,7 @@ char asm_buf[128];
 void print_bin_instr(uint32_t pc) {
 	int i;
 	if(temu_state != END) {
-		int l = sprintf(asm_buf, "%8x:   ", cpu.pc);
+		int l = sprintf(asm_buf, "%8x:   ", cpu.pc - 4);
 		for(i = 3; i >= 0; i --) {
 			l += sprintf(asm_buf + l, "%02x ", instr_fetch(pc + i, 1));
 		}
