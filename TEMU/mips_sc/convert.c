@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 	FILE *in;
 	FILE *out;
 
-	uint8_t *file_bin_name = malloc(80);
+	uint8_t *file_bin_name = malloc(80); //
 	uint8_t *file_data_name = malloc(80);
 
 	int i,j,k,n;
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 	    fprintf(out, "%02x%02x%02x%02x\n", mem[0], mem[1], mem[2],mem[3]);
         }
 	fclose(in);
-	fclose(out);
+	fclose(out);  
 
     return 0;
 }
